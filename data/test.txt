@@ -1,2 +1,0 @@
-This is a test to see if the server and client 
-are able to talk to each other

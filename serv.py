@@ -6,9 +6,13 @@
 # *****************************************************
 
 import socket
-
+import sys 
 # The port on which to listen
-listenPort = 60000
+if len(sys.argv) < 2:
+    print("USAGE: python serv.py <PORT NUMBER>")
+    sys.exit(1)
+
+listenPort = int(sys.argv[1])
 
 # Create a welcome socket. 
 welcomeSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
