@@ -1,6 +1,15 @@
 import socket
 import sys
 
+
+def padZeros(number, length):
+    """Return string representation of number padded with 0s"""
+    number_str = str(number)
+    while len(number_str) < length:
+        number_str = "0" + number_str
+    print(number_str)
+    return number_str
+
 # Command line checks 
 if len(sys.argv) < 3:
     print("USAGE: python cli.py <SERVER MACHINE> <SERVER PORT>")
@@ -20,23 +29,25 @@ connSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 connSock.connect((serverAddr, serverPort))
 
 while True:
-    # Print the prompt and wait for user input
     command = input('ftp> ')
 
     # Check what command the user has entered
     if command == 'quit':
-        # The user wants to quit the program
         break
     elif command.startswith('get '):
         # The user wants to download a file
-        filename = command[4:]
+        fileName = command[4:]
+        # 
+        #
         # TODO: Implement file download
+        #
+        #
     elif command.startswith('put '):
         # The user wants to upload a file
-        filename = command[4:]
-        # The name of the file
-        fileName = filename
+        fileName = command[4:]
 
+        #Send filename
+        connSock.sendall(fileName.encode())
         # Open the file
         fileObj = open(fileName, "r")
 
@@ -48,45 +59,37 @@ while True:
 
         # Keep sending until all is sent
         while True:
-            
-            # Read 65536 bytes of data
             fileData = fileObj.read(65536)
-            
+
             # Make sure we did not hit EOF
             if fileData:
-                
-                    
-                # Get the size of the data read
-                # and convert it to string
-                dataSizeStr = str(len(fileData))
-                
-                # Prepend 0's to the size string
-                # until the size is 10 bytes
-                while len(dataSizeStr) < 10:
-                    dataSizeStr = "0" + dataSizeStr    
+                # Get the size of the data
+                dataSize = len(fileData)
+                dataSizeStr =  padZeros(dataSize, 10)
             
-                # Prepend the size of the data to the
-                # file data.
                 fileData = dataSizeStr + fileData    
                 
                 # The number of bytes sent
                 numSent = 0
-                
+
                 # Send the data!
                 while len(fileData) > numSent:
                     numSent += connSock.send(fileData[numSent:].encode())
-            
+
             # The file has been read. We are done
             else:
                 break
 
         print ("Sent ", numSent, " bytes.")
-        
+
         # Close the file
         fileObj.close()
     elif command == 'ls':
+        #
+        #
         # The user wants to list the files on the server
         # TODO: Implement file listing
+        #
         pass
     else:
         print('Unknown command')

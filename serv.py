@@ -1,97 +1,75 @@
-
-# *****************************************************
-# This file implements a server for receiving the file
-# sent using sendfile(). The server receives a file and
-# prints it's contents.
-# *****************************************************
-
 import socket
 import sys 
-# The port on which to listen
+import os
+
+# Command line arugment check
 if len(sys.argv) < 2:
     print("USAGE: python serv.py <PORT NUMBER>")
     sys.exit(1)
 
 listenPort = int(sys.argv[1])
 
-# Create a welcome socket. 
 welcomeSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# Bind the socket to the port
-welcomeSock.bind(('', listenPort))
-
-# Start listening on the socket
+welcomeSock.bind(('', listenPort)) #Binds to localhost
 welcomeSock.listen(1)
 
-# ************************************************
-# Receives the specified number of bytes
-# from the specified socket
-# @param sock - the socket from which to receive
-# @param numBytes - the number of bytes to receive
-# @return - the bytes received
-# *************************************************
-def recvAll(sock, numBytes):
+# Directory where to store files from client
+data_dir = 'data'
+os.makedirs(data_dir, exist_ok=True) # Make sure that the path exists
 
-    # The buffer
+
+def recvAll(sock, numBytes):
     recvBuff = b""
-    
-    # The temporary buffer
     tmpBuff = b""
-    
+
     # Keep receiving till all is received
     while len(recvBuff) < numBytes:
-        
-        # Attempt to receive bytes
+        # Attempt to receive all bytes
         tmpBuff =  sock.recv(numBytes)
 
-        # The other side has closed the socket
+        # Check to make sure the other side has not closed
         if not tmpBuff:
             break
-        
+
         # Add the received bytes to the buffer
         recvBuff += tmpBuff
-    
     return recvBuff
-		
 # Accept connections forever
 while True:
-	
-	print("Waiting for connections...")
-		
-	# Accept connections
-	clientSock, addr = welcomeSock.accept()
-	
-	print("Accepted connection from client: ", addr)
-	print("\n")
-	
-	# The buffer to all data received from the
-	# the client.
-	fileData = ""
-	
-	# The temporary buffer to store the received
-	# data.
-	recvBuff = ""
-	
-	# The size of the incoming file
-	fileSize = 0	
-	
-	# The buffer containing the file size
-	fileSizeBuff = ""
-	
-	# Receive the first 10 bytes indicating the
-	# size of the file
-	fileSizeBuff = recvAll(clientSock, 10)
-		
-	# Get the file size
-	fileSize = int(fileSizeBuff)
-	
-	print("The file size is ", fileSize)
-	
-	# Get the file data
-	fileData = recvAll(clientSock, fileSize)
-	
-	print("The file data is: ")
-	print(fileData)
-		
-	# Close our side
-	clientSock.close()
+
+    print("Waiting for connections...")
+
+    # Accept connections
+    clientSock, addr = welcomeSock.accept()
+
+    print("Accepted connection from client: ", addr)
+    print("\n")
+
+    filename = clientSock.recv(1024).decode()
+    fileData = ""
+
+    # The temporary buffer to store the received data
+    recvBuff = ""
+    fileSizeBuff = ""
+    
+    fileSize = 0	
+
+    # Receive the first 10 bytes indicating the
+    # size of the file
+    fileSizeBuff = recvAll(clientSock, 10)
+        
+    fileSize = int(fileSizeBuff)
+
+    print("The file size is", fileSize)
+
+    # Get the file data
+    fileData = recvAll(clientSock, fileSize)
+
+    # Write the data to a file in the data directory
+    with open(os.path.join(data_dir, filename), 'wb') as f:
+        f.write(fileData)
+
+    print(f"Received file {filename}")
+
+    # Close our side
+    clientSock.close()
