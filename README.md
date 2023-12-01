@@ -10,9 +10,14 @@
 
 ## Getting Started
 
-* To Run 
-* python .\serv.py 60000
-* python .\cli.py localhost 60000
+1. Open a terminal and Run the server:
+    ```
+    python .\serv.py 60000
+    ```
+2. Open another terminal and Run the client:
+    ```
+    python .\cli.py localhost 60000
+    ```
 
 ## Designing the Protocol
 **Control Channels**
