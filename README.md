@@ -5,8 +5,8 @@
 * Long Vu -- Longvu2000@csu.fullerton.edu
 * Marcilino Lamiy -- Maromicho12@csu.fullerton.edu
 * Kristen Camarena -- K.camarena99@csu.fullerton.edu
-* Parish Gutierrez -- 
-* Daniel Corona --  
+* Parish Gutierrez -- Parishgutierrez@csu.fullerton.edu
+* Daniel Corona -- Dancorona93@csu.fullerton.edu
 
 ## Getting Started
 
