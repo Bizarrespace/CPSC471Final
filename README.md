@@ -1,4 +1,17 @@
-# CPSC471Final
+# Members
+
+Name: Long Vu
+Email:
+Name: Marcilino Lamiy
+Email: Maromicho12@csu.fullerton.edu
+Name: Kristen Camarena
+Email: 
+Name: Parish Gutierrez
+Email: 
+Name: Daniel Corona
+Email: 
+
+# CPSC471 Final
 
 * To Run 
 * python .\serv.py 60000
