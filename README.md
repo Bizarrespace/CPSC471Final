@@ -2,11 +2,11 @@
 
 ## Members
 
-Long Vu -- Longvu2000@csu.fullerton.edu
-Marcilino Lamiy -- Maromicho12@csu.fullerton.edu
-Kristen Camarena --
-Parish Gutierrez -- 
-Daniel Corona --  
+* Long Vu -- Longvu2000@csu.fullerton.edu
+* Marcilino Lamiy -- Maromicho12@csu.fullerton.edu
+* Kristen Camarena --
+* Parish Gutierrez -- 
+* Daniel Corona --  
 
 ## Getting Started
 
