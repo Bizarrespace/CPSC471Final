@@ -1,23 +1,20 @@
-# Members
-
-Name: Long Vu
-Email:
-Name: Marcilino Lamiy
-Email: Maromicho12@csu.fullerton.edu
-Name: Kristen Camarena
-Email: 
-Name: Parish Gutierrez
-Email: 
-Name: Daniel Corona
-Email: 
-
 # CPSC471 Final
+
+## Members
+
+Long Vu -- Longvu2000@csu.fullerton.edu
+Marcilino Lamiy -- Maromicho12@csu.fullerton.edu
+Kristen Camarena --
+Parish Gutierrez -- 
+Daniel Corona --  
+
+## Getting Started
 
 * To Run 
 * python .\serv.py 60000
 * python .\cli.py localhost 60000
 
-# Designing the Protocol
+## Designing the Protocol
 **Control Channels**
 * Client sends control messages to server to let the server know what action the client wants to take.
 * These messages will be strings that start with a command keyword, followed by any parameteres that are needed by that command
