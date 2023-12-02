@@ -3,31 +3,31 @@ import sys
 import os
 
 
-def padZeros(number, length):
+def pad_zeros(number, length):
     """Return string representation of number padded with 0s"""
     number_str = str(number)
     while len(number_str) < length:
         number_str = "0" + number_str
-    print(number_str)
     return number_str
 
-# Command line checks 
+
+# Command line checks
 if len(sys.argv) < 3:
     print("USAGE: python cli.py <SERVER MACHINE> <SERVER PORT>")
     sys.exit(1)
 
 # Get info from the command line
-serverMachine = sys.argv[1]
-serverPort = int(sys.argv[2])
+server_machine = sys.argv[1]
+server_port = int(sys.argv[2])
 
 # Convert name to IP address
-serverAddr = socket.gethostbyname(serverMachine)
+server_addr = socket.gethostbyname(server_machine)
 
 # Create a TCP socket
-connSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+conn_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect to the server
-connSock.connect((serverAddr, serverPort))
+conn_sock.connect((server_addr, server_port))
 
 while True:
     command = input('ftp> ')
@@ -37,43 +37,43 @@ while True:
         break
     elif command.startswith('get '):
         # The user wants to download a file
-        fileName = command[4:]
+        file_name = command[4:]
         # TODO: Implement file download
-        # this is to recieve file size and data
-        connSock.send(command.encode())
-        fileSizeStr = connSock.recv(10).decode()
-        fileSize = int(fileSizeStr)
-        fileData = connSock.recv(fileSize)
+        # this is to receive file size and data
+        conn_sock.send(command.encode())
+        file_size_str = conn_sock.recv(10).decode()
+        file_size = int(file_size_str)
+        file_data = conn_sock.recv(file_size)
 
-        with open(fileName, 'wb') as f:
-            f.write(fileData)
+        with open(file_name, 'wb') as f:
+            f.write(file_data)
 
-        print(f"Received file {fileName}")
+        print(f"Received file {file_name}")
         
     elif command.startswith('put '):
-        # This is to upload a file, ge file size and send the file data
-        fileName = command[4:]
-        connSock.sendall(command.encode())
-        fileSize = os.path.getsize(fileName)
-        fileSizeStr = padZeros(fileSize, 10)
-        connSock.send(fileSizeStr.encode())
+        # This is to upload a file, get file size and send the file data
+        file_name = command[4:]
+        conn_sock.sendall(command.encode())
+        file_size = os.path.getsize(file_name)
+        file_size_str = pad_zeros(file_size, 10)
+        conn_sock.send(file_size_str.encode())
 
-        with open(fileName, 'rb') as f:
-            fileData = f.read()
-            connSock.sendall(fileData)
+        with open(file_name, 'rb') as f:
+            file_data = f.read()
+            conn_sock.sendall(file_data)
 
-        print(f"Sent file {fileName}")
+        print(f"Sent file {file_name}")
         
     elif command == 'ls':
         # The user wants to list the files on the server
         # TODO: Implement file listing
         # This is to receive and print the file list for the ls command
-        connSock.sendall(command.encode())
-        file_list = connSock.recv(4096).decode()
+        conn_sock.sendall(command.encode())
+        file_list = conn_sock.recv(4096).decode()
         print(file_list)
         pass
     else:
         print('Unknown command')
 
 # Close the socket
-connSock.close()
+conn_sock.close()
