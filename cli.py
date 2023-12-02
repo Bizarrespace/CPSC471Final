@@ -1,5 +1,6 @@
 import socket
 import sys
+import os
 
 
 def padZeros(number, length):
@@ -37,59 +38,39 @@ while True:
     elif command.startswith('get '):
         # The user wants to download a file
         fileName = command[4:]
-        # 
-        #
         # TODO: Implement file download
-        #
-        #
+        # this is to recieve file size and data
+        connSock.send(command.encode())
+        fileSizeStr = connSock.recv(10).decode()
+        fileSize = int(fileSizeStr)
+        fileData = connSock.recv(fileSize)
+
+        with open(fileName, 'wb') as f:
+            f.write(fileData)
+
+        print(f"Received file {fileName}")
+        
     elif command.startswith('put '):
-        # The user wants to upload a file
+        # This is to upload a file, ge file size and send the file data
         fileName = command[4:]
+        connSock.sendall(command.encode())
+        fileSize = os.path.getsize(fileName)
+        fileSizeStr = padZeros(fileSize, 10)
+        connSock.send(fileSizeStr.encode())
 
-        #Send filename
-        connSock.sendall(fileName.encode())
-        # Open the file
-        fileObj = open(fileName, "r")
+        with open(fileName, 'rb') as f:
+            fileData = f.read()
+            connSock.sendall(fileData)
 
-        # The number of bytes sent
-        numSent = 0
-
-        # The file data
-        fileData = None
-
-        # Keep sending until all is sent
-        while True:
-            fileData = fileObj.read(65536)
-
-            # Make sure we did not hit EOF
-            if fileData:
-                # Get the size of the data
-                dataSize = len(fileData)
-                dataSizeStr =  padZeros(dataSize, 10)
-            
-                fileData = dataSizeStr + fileData    
-                
-                # The number of bytes sent
-                numSent = 0
-
-                # Send the data!
-                while len(fileData) > numSent:
-                    numSent += connSock.send(fileData[numSent:].encode())
-
-            # The file has been read. We are done
-            else:
-                break
-
-        print ("Sent ", numSent, " bytes.")
-
-        # Close the file
-        fileObj.close()
+        print(f"Sent file {fileName}")
+        
     elif command == 'ls':
-        #
-        #
         # The user wants to list the files on the server
         # TODO: Implement file listing
-        #
+        # This is to receive and print the file list for the ls command
+        connSock.sendall(command.encode())
+        file_list = connSock.recv(4096).decode()
+        print(file_list)
         pass
     else:
         print('Unknown command')
