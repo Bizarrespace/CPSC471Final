@@ -44,14 +44,22 @@ try:
         print("Waiting for connections...")
 
         # Accept connections
-        clientSock, addr = welcomeSock.accept()
+        control_sock, addr = welcomeSock.accept()
+
+        # Get the data port from the client
+        data_port_msg = control_sock.recv(1024).decode()
+        data_port = int(data_port_msg.split()[1])
+
+        # Create a TCP socket for data connection
+        data_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        data_sock.connect((addr[0], data_port))  # Connect to the client's data port
 
         print("Accepted connection from client: ", addr)
         print("\n")
-        
+
         while True:
             try:
-                command = clientSock.recv(1024).decode()
+                command = control_sock.recv(1024).decode()
 
                 # Catches when the client disconnects
                 if not command:
@@ -69,27 +77,27 @@ try:
                         fileSize = os.path.getsize(filepath)
                         fileSizeStr = str(fileSize).zfill(10)
 
-                        clientSock.send(fileSizeStr.encode())
+                        control_sock.send(fileSizeStr.encode())
 
                         with open(filepath, 'rb') as f:
                             fileData = f.read()
-                            clientSock.sendall(fileData)
+                            data_sock.sendall(fileData)
 
                         print(f"SUCCESS: Sent file {filename} to {addr}")
 
                     else:
                         # File does not exist
-                        clientSock.send("FAILURE File does not exist".encode())
+                        control_sock.send("FAILURE File does not exist".encode())
                         print(f"FAILURE: File {filename} does not exist")
 
                 elif command.startswith('put '):
                     # Client wants to upload a file
                     filename = command[4:]
 
-                    fileSizeStr = recvAll(clientSock, 10).decode()
+                    fileSizeStr = recvAll(control_sock, 10).decode()
                     fileSize = int(fileSizeStr)
 
-                    fileData = recvAll(clientSock, fileSize)
+                    fileData = recvAll(data_sock, fileSize)
 
                     with open(os.path.join(data_dir, filename), 'wb') as f:
                         f.write(fileData)
@@ -100,7 +108,7 @@ try:
                     # Client requests file listing
                     file_list = os.listdir(data_dir)
                     file_list_str = "\n".join(file_list)
-                    clientSock.sendall(file_list_str.encode())
+                    data_sock.sendall(file_list_str.encode())
                     print(f"SUCCESS: Sent file list to {addr}")
 
                 else:
@@ -113,10 +121,10 @@ try:
                 print("Server is shutting down...")
                 welcomeSock.close()
                 sys.exit(0)
-            
 
         # Close our side
-        clientSock.close()
+        control_sock.close()
+        data_sock.close()
 
 except KeyboardInterrupt:
     print("Server is shutting down...")

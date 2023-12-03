@@ -23,11 +23,23 @@ server_port = int(sys.argv[2])
 # Convert name to IP address
 server_addr = socket.gethostbyname(server_machine)
 
-# Create a TCP socket
-conn_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# Create a TCP socket for control connection
+control_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect to the server
-conn_sock.connect((server_addr, server_port))
+control_sock.connect((server_addr, server_port))
+
+# Create a TCP socket for data connection
+data_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+data_sock.bind(('localhost', 0))  # Bind to an ephemeral port
+data_port = data_sock.getsockname()[1]
+
+# Tell the server our data port
+control_sock.send(f'DATA_PORT {data_port}'.encode())
+
+# Wait for the server to connect to our data port
+data_sock.listen(1)
+data_conn, _ = data_sock.accept()
 
 while True:
     command = input('ftp> ')
@@ -39,24 +51,23 @@ while True:
         # The user wants to download a file
         file_name = command[4:]
         # this is to receive file size and data
-        conn_sock.send(command.encode())
-        file_size_str = conn_sock.recv(10).decode()
+        control_sock.send(command.encode())
+        file_size_str = control_sock.recv(10).decode()
 
         if file_size_str.startswith("FAILURE"):
             print("File does not exist!")
             continue
-    
+
         file_size = int(file_size_str)
-        file_data = conn_sock.recv(file_size)
+        file_data = data_conn.recv(file_size)
 
         os.makedirs('clientData', exist_ok=True)
-
 
         with open(os.path.join('clientData', file_name), 'wb') as f:
             f.write(file_data)
 
         print(f"Received file {file_name} of size {file_size} bytes")
-        
+
     elif command.startswith('put '):
         # This is to upload a file, get file size and send the file data
         file_name = command[4:]
@@ -64,27 +75,26 @@ while True:
         if not os.path.exists(file_path):
             print("FAILURE: File does not exist")
             continue
-        conn_sock.sendall(command.encode())
+        control_sock.sendall(command.encode())
         file_size = os.path.getsize(file_path)
         file_size_str = pad_zeros(file_size, 10)
-        conn_sock.send(file_size_str.encode())
+        control_sock.send(file_size_str.encode())
 
         with open(file_path, 'rb') as f:
             file_data = f.read()
-            conn_sock.sendall(file_data)
+            data_conn.sendall(file_data)
 
         print(f"Sent file {file_name} of size {file_size} bytes")
-        
+
     elif command == 'ls':
         # The user wants to list the files on the server
-        # TODO: Implement file listing
         # This is to receive and print the file list for the ls command
-        conn_sock.sendall(command.encode())
-        file_list = conn_sock.recv(4096).decode()
+        control_sock.sendall(command.encode())
+        file_list = data_conn.recv(4096).decode()
         print(file_list)
-        pass
     else:
         print('Unknown command')
 
-# Close the socket
-conn_sock.close()
+# Close the sockets
+control_sock.close()
+data_conn.close()
