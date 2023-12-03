@@ -1,5 +1,8 @@
 # CPSC471 Final - Python
 
+## Programming Language:
+* Python
+
 ## Team Members
 
 - **Long Vu**
@@ -21,7 +24,7 @@
     - **GitHub:** DanCorona08
     - **Email:** jimbo497cat@gmail.com
 
-## Getting Started
+## How to run:
 
 1. Open a terminal and Run the server:
     ```
@@ -57,20 +60,32 @@
 * Client and server should send and recieve data in small chucks, 1024 bytes for example, ths in ensures sender does not fill buffer faster than the receiver can handle such data.
 
 ```
+PUT Command:
 Client                      Server
 ------                      ------
 PUT filename
-                            OK
+                            SUCCESS
+<file size>
 <file data>
-EOF
-                            OK
 
 
+Get command:
 Client                      Server
 ------                      ------
 GET filename
+                            SUCCESS
+<file size>
+
+Ls command:
+Client                      Server
+------                      ------
+LS
                             OK
-                            <file data>
-                            EOF
-OK       
+<file list>
+
+Quit Command:
+Client                      Server
+------                      ------
+QUIT
+                            Client Disconnect
 ```
