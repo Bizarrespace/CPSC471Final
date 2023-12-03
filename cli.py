@@ -2,14 +2,12 @@ import socket
 import sys
 import os
 
-
 def pad_zeros(number, length):
     """Return string representation of number padded with 0s"""
     number_str = str(number)
     while len(number_str) < length:
         number_str = "0" + number_str
     return number_str
-
 
 # Command line checks
 if len(sys.argv) < 3:
@@ -52,13 +50,13 @@ while True:
         file_name = command[4:]
         # this is to receive file size and data
         control_sock.send(command.encode())
-        file_size_str = control_sock.recv(10).decode()
+        response = control_sock.recv(1024).decode()
 
-        if file_size_str.startswith("FAILURE"):
+        if response.startswith("FAILURE"):
             print("File does not exist!")
             continue
 
-        file_size = int(file_size_str)
+        file_size = int(response)
         file_data = data_conn.recv(file_size)
 
         os.makedirs('clientData', exist_ok=True)
