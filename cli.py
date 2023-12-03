@@ -38,31 +38,42 @@ while True:
     elif command.startswith('get '):
         # The user wants to download a file
         file_name = command[4:]
-        # TODO: Implement file download
         # this is to receive file size and data
         conn_sock.send(command.encode())
         file_size_str = conn_sock.recv(10).decode()
+
+        if file_size_str.startswith("FAILURE"):
+            print("File does not exist!")
+            continue
+    
         file_size = int(file_size_str)
         file_data = conn_sock.recv(file_size)
 
-        with open(file_name, 'wb') as f:
+        os.makedirs('clientData', exist_ok=True)
+
+
+        with open(os.path.join('clientData', file_name), 'wb') as f:
             f.write(file_data)
 
-        print(f"Received file {file_name}")
+        print(f"Received file {file_name} of size {file_size} bytes")
         
     elif command.startswith('put '):
         # This is to upload a file, get file size and send the file data
         file_name = command[4:]
+        file_path = os.path.join('clientData', file_name)
+        if not os.path.exists(file_path):
+            print("FAILURE: File does not exist")
+            continue
         conn_sock.sendall(command.encode())
-        file_size = os.path.getsize(file_name)
+        file_size = os.path.getsize(file_path)
         file_size_str = pad_zeros(file_size, 10)
         conn_sock.send(file_size_str.encode())
 
-        with open(file_name, 'rb') as f:
+        with open(file_path, 'rb') as f:
             file_data = f.read()
             conn_sock.sendall(file_data)
 
-        print(f"Sent file {file_name}")
+        print(f"Sent file {file_name} of size {file_size} bytes")
         
     elif command == 'ls':
         # The user wants to list the files on the server

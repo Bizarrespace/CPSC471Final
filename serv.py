@@ -14,7 +14,7 @@ welcomeSock.bind(('', listenPort))  # Binds to localhost
 welcomeSock.listen(1)
 
 # Directory where to store files from client
-data_dir = 'data'
+data_dir = 'serverData'
 os.makedirs(data_dir, exist_ok=True)  # Make sure that the path exists
 
 
@@ -37,65 +37,88 @@ def recvAll(sock, numBytes):
 
 
 # Accept connections forever
-while True:
+try:
 
-    print("Waiting for connections...")
+    while True:
 
-    # Accept connections
-    clientSock, addr = welcomeSock.accept()
+        print("Waiting for connections...")
 
-    print("Accepted connection from client: ", addr)
-    print("\n")
+        # Accept connections
+        clientSock, addr = welcomeSock.accept()
 
-    command = clientSock.recv(1024).decode()
+        print("Accepted connection from client: ", addr)
+        print("\n")
+        
+        while True:
+            try:
+                command = clientSock.recv(1024).decode()
 
-    if command.startswith('get '):
-        # Client wants to download a file
-        filename = command[4:]
+                # Catches when the client disconnects
+                if not command:
+                    print("Client has disconnected")
+                    break
 
-        filepath = os.path.join(data_dir, filename)
+                if command.startswith('get '):
+                    # Client wants to download a file
+                    filename = command[4:]
 
-        if os.path.exists(filepath):
-            # File exists, send file to the client
-            fileSize = os.path.getsize(filepath)
-            fileSizeStr = str(fileSize).zfill(10)
+                    filepath = os.path.join(data_dir, filename)
 
-            clientSock.send(fileSizeStr.encode())
+                    if os.path.exists(filepath):
+                        # File exists, send file to the client
+                        fileSize = os.path.getsize(filepath)
+                        fileSizeStr = str(fileSize).zfill(10)
 
-            with open(filepath, 'rb') as f:
-                fileData = f.read()
-                clientSock.sendall(fileData)
+                        clientSock.send(fileSizeStr.encode())
 
-            print(f"Sent file {filename} to {addr}")
+                        with open(filepath, 'rb') as f:
+                            fileData = f.read()
+                            clientSock.sendall(fileData)
 
-        else:
-            # File does not exist
-            clientSock.send("FAILURE File does not exist".encode())
+                        print(f"SUCCESS: Sent file {filename} to {addr}")
 
-    elif command.startswith('put '):
-        # Client wants to upload a file
-        filename = command[4:]
+                    else:
+                        # File does not exist
+                        clientSock.send("FAILURE File does not exist".encode())
+                        print(f"FAILURE: File {filename} does not exist")
 
-        fileSizeStr = recvAll(clientSock, 10).decode()
-        fileSize = int(fileSizeStr)
+                elif command.startswith('put '):
+                    # Client wants to upload a file
+                    filename = command[4:]
 
-        fileData = recvAll(clientSock, fileSize)
+                    fileSizeStr = recvAll(clientSock, 10).decode()
+                    fileSize = int(fileSizeStr)
 
-        with open(os.path.join(data_dir, filename), 'wb') as f:
-            f.write(fileData)
+                    fileData = recvAll(clientSock, fileSize)
 
-        print(f"Received file {filename} from {addr}")
+                    with open(os.path.join(data_dir, filename), 'wb') as f:
+                        f.write(fileData)
 
-    elif command == 'ls':
-        # Client requests file listing
-        file_list = os.listdir(data_dir)
-        file_list_str = "\n".join(file_list)
-        clientSock.sendall(file_list_str.encode())
-        print(f"Sent file list to {addr}")
+                    print(f"SUCCESS: Received file {filename} from {addr}")
 
-    else:
-        # Unknown command
-        print('Unknown command')
+                elif command == 'ls':
+                    # Client requests file listing
+                    file_list = os.listdir(data_dir)
+                    file_list_str = "\n".join(file_list)
+                    clientSock.sendall(file_list_str.encode())
+                    print(f"SUCCESS: Sent file list to {addr}")
 
-    # Close our side
-    clientSock.close()
+                else:
+                    # Unknown command
+                    print('Unknown command')
+            except ConnectionAbortedError:
+                print("Client has disconnected")
+                break
+            except KeyboardInterrupt:
+                print("Server is shutting down...")
+                welcomeSock.close()
+                sys.exit(0)
+            
+
+        # Close our side
+        clientSock.close()
+
+except KeyboardInterrupt:
+    print("Server is shutting down...")
+    welcomeSock.close()
+    sys.exit(0)
