@@ -1,12 +1,25 @@
 # CPSC471 Final
 
-## Members
+## Team Members
 
-* Long Vu -- Longvu2000@csu.fullerton.edu
-* Marcilino Lamiy -- Maromicho12@csu.fullerton.edu
-* Kristen Camarena -- K.camarena99@csu.fullerton.edu
-* Parish Gutierrez -- Parishgutierrez@csu.fullerton.edu
-* Daniel Corona -- Dancorona93@csu.fullerton.edu
+- **Long Vu**
+    - **GitHub:** Bizarrespace
+    - **Email:** Longvu2000@csu.fullerton.edu
+- **Marcilino Lamiy**
+    - **GitHub:** Marcilino421
+    - **Email:** Maromicho12@csu.fullerton.edu
+
+- **Kristen Camarena**
+    - **GitHub:** kristencamarena
+    - **Email:** K.camarena99@csu.fullerton.edu
+
+- **Parish Gutierrez**
+    - **GitHub:** ParishGutierrez
+    - **Email:** saichandmeda0707@gmail.com
+
+- **Daniel Corona**
+    - **GitHub:** DanCorona08
+    - **Email:** jimbo497cat@gmail.com
 
 ## Getting Started
 
