@@ -1,4 +1,4 @@
-# CPSC471 Final
+# CPSC471 Final - Python
 
 ## Team Members
 
